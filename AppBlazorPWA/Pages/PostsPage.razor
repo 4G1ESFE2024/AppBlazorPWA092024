@@ -1,0 +1,81 @@
+﻿@page "/posts"
+@inject PostService postService
+
+<h3>Posts</h3>
+<h4>Agregar Nuevo Post</h4>
+<EditForm Model="newPost" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label>Título</label>
+        <InputText @bind-Value="newPost.Title" class="form-control" />
+        <ValidationMessage For="@(() => newPost.Title)" />
+    </div>
+
+    <div class="form-group">
+        <label>Contenido</label>
+        <InputTextArea @bind-Value="newPost.Body" class="form-control" />
+        <ValidationMessage For="@(() => newPost.Body)" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Guardar Post</button>
+</EditForm>
+@if (posts == null)
+{
+    <p><em>Cargando...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Título</th>
+                <th>Contenido</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var post in posts)
+            {
+                <tr>
+                    <td>@post.Title</td>
+                    <td>@post.Body</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    // Lista privada que almacena los objetos PostDTO.
+    private List<PostDTO> posts;
+
+    // Objeto PostDTO para almacenar los datos del nuevo post a crear.
+    private PostDTO newPost = new PostDTO();
+
+    // Método que se ejecuta cuando el componente se inicializa.
+    protected override async Task OnInitializedAsync()
+    {
+        // Llama al servicio para obtener la lista de posts de manera asíncrona.
+        posts = await postService.GetPostsAsync();
+
+        // Ordena la lista de posts en orden descendente según el Id.
+        posts = posts.OrderByDescending(s => s.Id).ToList();
+    }
+
+    // Método que se llama al enviar un formulario válido.
+    private async Task HandleValidSubmit()
+    {
+        // Crea un nuevo post a través del servicio y espera su finalización.
+        var createdPost = await postService.CreatePostAsync(newPost);
+
+        // Agrega el nuevo post a la lista de posts existente.
+        posts.Add(createdPost);
+
+        // Reinicia el objeto newPost para limpiar el formulario.
+        newPost = new PostDTO();
+
+        // Vuelve a ordenar la lista de posts en orden descendente según el Id.
+        posts = posts.OrderByDescending(s => s.Id).ToList();
+    }
+}

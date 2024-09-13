@@ -1,4 +1,5 @@
 using AppBlazorPWA;
+using AppBlazorPWA.Data.Services;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
@@ -12,5 +13,7 @@ builder.Services.AddHttpClient("JsonPlaceholder_API", client =>
 {
     client.BaseAddress = new Uri("https://jsonplaceholder.typicode.com/");
 });
+
+builder.Services.AddScoped<PostService>();
 
 await builder.Build().RunAsync();
